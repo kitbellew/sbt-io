@@ -20,7 +20,20 @@ object RetrySpec extends verify.BasicTestSuite {
     val i = new AtomicInteger()
     def throww(): Any = throw new IOException(i.incrementAndGet().toString)
     try {
-      Retry(throww(), limit = 10, sleepInMillis = 0, noExcluded: _*)
+      Retry(throww(), limit = 10, sleepInMillis = 10, noExcluded: _*)
+      assert(false)
+    } catch {
+      case ioe: IOException =>
+        assert(ioe.getMessage == "1")
+        assert(i.get() == 10)
+    }
+  }
+
+  test("Retry.io should throw first exception after number of failures") {
+    val i = new AtomicInteger()
+    def throww(): Any = throw new IOException(i.incrementAndGet().toString)
+    try {
+      Retry.io(throww(), limit = 10, sleepInMillis = 10, noExcluded: _*)
       assert(false)
     } catch {
       case ioe: IOException =>
@@ -52,5 +65,13 @@ object RetrySpec extends verify.BasicTestSuite {
       else ???
     Retry(throww())
     ()
+  }
+
+  test("Retry.io should throw non-IOException") {
+    def throww(): Any = ???
+    intercept[NotImplementedError] {
+      Retry.io(throww())
+      ()
+    }
   }
 }
