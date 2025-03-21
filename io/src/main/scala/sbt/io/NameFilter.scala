@@ -223,7 +223,7 @@ case object DirectoryFilter extends FileFilter with PathFilter {
   override def accept(path: NioPath, attributes: FileAttributes): Boolean = attributes.isDirectory
 }
 
-/** A [[FileFilter]] that selects files that are a directory according to `java.io.File.isFile`. */
+/** A [[FileFilter]] that selects files that are a normal file according to `java.io.File.isFile`. */
 case object RegularFileFilter extends FileFilter with PathFilter {
   def accept(file: File): Boolean = file.isFile
   override def accept(path: NioPath, attributes: FileAttributes): Boolean = attributes.isRegularFile
