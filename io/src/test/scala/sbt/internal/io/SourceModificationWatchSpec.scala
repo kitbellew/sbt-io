@@ -28,7 +28,7 @@ import scala.annotation.tailrec
 import scala.concurrent.duration._
 import scala.util.{ Success, Try }
 
-private[sbt] trait EventMonitorSpec { self: AnyFlatSpec with Matchers =>
+private[sbt] trait EventMonitorSpec { self: AnyFlatSpec & Matchers =>
   def pollDelay: FiniteDuration
   def newObservable(glob: Seq[Glob], logger: Logger): Observable[Event]
   def newObservable(file: File): Observable[Event] =
@@ -568,7 +568,7 @@ object EventMonitorSpec {
     override def debug(msg: Any): Unit = lines.synchronized { lines += msg.toString; () }
     def printLines(msg: String): Unit = println(s"$msg. Log lines:\n${lines mkString "\n"}")
   }
-  implicit class ObservableOps(val observable: Observable[Event] with Registerable[Event])
+  implicit class ObservableOps(val observable: Observable[Event] & Registerable[Event])
       extends AnyVal {
     def register(globs: Seq[Glob]): Observable[Event] = {
       val delegate = aggregate(globs.flatMap(observable.register(_).toOption): _*)
