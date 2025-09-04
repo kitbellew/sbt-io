@@ -574,7 +574,7 @@ object EventMonitorSpec {
   implicit class ObservableOps(val observable: Observable[Event] & Registerable[Event])
       extends AnyVal {
     def register(globs: Seq[Glob]): Observable[Event] = {
-      val delegate = aggregate(globs.flatMap(observable.register(_).toOption): _*)
+      val delegate = aggregate(globs.flatMap(observable.register(_).toOption)*)
       new Observable[Event] {
         override def addObserver(o: Observer[Event]): AutoCloseable = delegate.addObserver(o)
         override def close(): Unit = {
@@ -605,7 +605,7 @@ private[sbt] trait RepoEventMonitorSpec extends AnyFlatSpec with Matchers with E
     val repository = factory()
     new Observable[Event] {
       val aggregated =
-        EventMonitorSpec.aggregate(globs.flatMap(repository.register(_).toOption): _*)
+        EventMonitorSpec.aggregate(globs.flatMap(repository.register(_).toOption)*)
       override def addObserver(observer: Observer[Event]): AutoCloseable =
         aggregated.addObserver(observer)
       override def close(): Unit = {

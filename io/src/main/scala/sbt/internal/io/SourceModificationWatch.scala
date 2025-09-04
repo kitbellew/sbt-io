@@ -124,7 +124,7 @@ private[sbt] final class WatchState private (
   }
 
   /** register a path with the watch service */
-  private[sbt] def register(path: Path): WatchKey = service.register(path, WatchState.events: _*)
+  private[sbt] def register(path: Path): WatchKey = service.register(path, WatchState.events*)
 
   /** A new state, with a new `count`. */
   private[sbt] def withCount(count: Int): WatchState =
@@ -161,7 +161,7 @@ private[sbt] class NewWatchState(
       registered.get(path) match {
         case Some(k) => k
         case None    =>
-          val key = service.register(path, WatchState.events: _*)
+          val key = service.register(path, WatchState.events*)
           registered.put(path, key).foreach { k =>
             k.reset()
             k.cancel()

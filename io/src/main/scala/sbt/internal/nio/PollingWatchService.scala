@@ -98,7 +98,7 @@ private[sbt] class PollingWatchService(delay: FiniteDuration, timeSource: TimeSo
     registered.get(path) match {
       case Some(k) => k
       case None    =>
-        val newKey = new PollingWatchKey(path, events: _*)
+        val newKey = new PollingWatchKey(path, events*)
         registered.put(path, newKey)
         pollQueue.add(newKey)
         newKey

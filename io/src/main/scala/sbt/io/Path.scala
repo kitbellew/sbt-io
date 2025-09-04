@@ -111,7 +111,7 @@ sealed trait RichNioPath extends Any {
    * This operation requires underlying filesystem to support `IO.isPosix`.
    */
   def permissions: Set[PosixFilePermission] =
-    Files.getPosixFilePermissions(asPath, linkOptions: _*).asScala.toSet
+    Files.getPosixFilePermissions(asPath, linkOptions*).asScala.toSet
 
   /**
    * Returns this file's POSIX permissions.
@@ -222,23 +222,23 @@ sealed trait RichNioPath extends Any {
     testPermission(PosixFilePermission.OTHERS_EXECUTE)
 
   def attributes: BasicFileAttributes =
-    Files.readAttributes(asPath, classOf[BasicFileAttributes], linkOptions: _*)
+    Files.readAttributes(asPath, classOf[BasicFileAttributes], linkOptions*)
 
   def posixAttributes: PosixFileAttributes =
-    Files.readAttributes(asPath, classOf[PosixFileAttributes], linkOptions: _*)
+    Files.readAttributes(asPath, classOf[PosixFileAttributes], linkOptions*)
 
   def dosAttributes: DosFileAttributes =
-    Files.readAttributes(asPath, classOf[DosFileAttributes], linkOptions: _*)
+    Files.readAttributes(asPath, classOf[DosFileAttributes], linkOptions*)
 
   def aclFileAttributeView: AclFileAttributeView =
-    Files.getFileAttributeView(asPath, classOf[AclFileAttributeView], linkOptions: _*)
+    Files.getFileAttributeView(asPath, classOf[AclFileAttributeView], linkOptions*)
 
   /**
    * Returns the owner of a file.
    * This operation requires underlying filesystem to support `IO.hasFileOwnerAttributeView`.
    */
   def owner: UserPrincipal =
-    Files.getOwner(asPath, linkOptions: _*)
+    Files.getOwner(asPath, linkOptions*)
 
   /**
    * Returns the owner of a file.

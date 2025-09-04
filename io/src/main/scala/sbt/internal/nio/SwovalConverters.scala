@@ -55,7 +55,7 @@ private[sbt] object SwovalFileTreeView extends FileTreeView.Nio[FileAttributes] 
         }
         result.result()
       },
-      excludedExceptions: _*
+      excludedExceptions*
     )
 
   private val excludedExceptions =

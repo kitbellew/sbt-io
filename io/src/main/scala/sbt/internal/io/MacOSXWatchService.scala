@@ -94,14 +94,14 @@ private[sbt] class MacOSXWatchService extends WatchService with Unregisterable {
                 }
               )
             ) {
-              parentKeys.put(parent, underlying.register(parent, events: _*))
+              parentKeys.put(parent, underlying.register(parent, events*))
             }
           }
           val key =
             parentKeys.remove(resolved) match {
               case Some(k) => k
               case _       =>
-                underlying.register(resolved, events: _*)
+                underlying.register(resolved, events*)
             }
           keys.put(resolved, key)
           key

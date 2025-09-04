@@ -64,7 +64,7 @@ object FileTreeView {
           try stream.iterator.asScala.flatMap(p => FileAttributes(p).toOption.map(p -> _)).toVector
           finally stream.close()
         },
-        excludedExceptions: _*
+        excludedExceptions*
       )
   }
 

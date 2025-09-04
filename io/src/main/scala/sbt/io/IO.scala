@@ -1433,7 +1433,7 @@ object IO {
    */
   def getModifiedTimeOrZero(file: File): Long =
     try {
-      Retry(Milli.getModifiedTime(file), excludeFileNotFound: _*)
+      Retry(Milli.getModifiedTime(file), excludeFileNotFound*)
     } catch {
       case _: FileNotFoundException =>
         val unnormalized = file.toPath
@@ -1458,7 +1458,7 @@ object IO {
    */
   def setModifiedTimeOrFalse(file: File, mtime: Long): Boolean =
     try {
-      Retry(Milli.setModifiedTime(file, mtime), excludeFileNotFound: _*)
+      Retry(Milli.setModifiedTime(file, mtime), excludeFileNotFound*)
       true
     } catch {
       case _: FileNotFoundException =>
