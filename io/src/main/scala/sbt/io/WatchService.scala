@@ -70,7 +70,7 @@ object WatchService {
         registered.synchronized {
           registered.get(path) match {
             case None =>
-              val key = path.register(service, events: _*)
+              val key = path.register(service, events*)
               registered += path -> key
               key
             case Some(key) =>

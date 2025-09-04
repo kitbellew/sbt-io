@@ -208,7 +208,7 @@ object Glob {
       rest match {
         case component :: tail if !hasMeta(component) => fullGlob(path.resolve(component), tail)
         case Nil                                      => Root(path)
-        case _                                        => Pattern(path, RelativeGlob(rest: _*))
+        case _                                        => Pattern(path, RelativeGlob(rest*))
       }
     }
     def addRegexPrefix(parts: List[String]): List[String] =
@@ -222,9 +222,9 @@ object Glob {
         }
         base match {
           case p if p.isAbsolute => fullGlob(p, addRegexPrefix(rest))
-          case _                 => RelativeGlob(addRegexPrefix(parts): _*)
+          case _                 => RelativeGlob(addRegexPrefix(parts)*)
         }
-      case _ => RelativeGlob(addRegexPrefix(parts): _*)
+      case _ => RelativeGlob(addRegexPrefix(parts)*)
     }
   }
 
@@ -592,7 +592,7 @@ sealed trait RelativeGlob extends Glob {
   private[file] def prefix: Option[Path] = matchers.takeWhile(_.isInstanceOf[PathComponent]) match {
     case Nil                                                       => None
     case (h: PathComponent) :: (t: List[PathComponent] @unchecked) =>
-      Some(Paths.get(h.glob, t.map(_.glob): _*))
+      Some(Paths.get(h.glob, t.map(_.glob)*))
     case _ => None
   }
   private[file] def tail: List[RelativeGlob.Matcher] =

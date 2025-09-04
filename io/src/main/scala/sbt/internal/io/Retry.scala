@@ -27,7 +27,7 @@ private[sbt] object Retry {
    * the excludedExceptions list.
    */
   private[sbt] def apply[@specialized T](f: => T, excludedExceptions: Class[? <: Throwable]*): T =
-    apply(f, limit, excludedExceptions: _*)
+    apply(f, limit, excludedExceptions*)
 
   /**
    * Retry on all non-fatal exceptions that are NOT listed in
@@ -37,7 +37,7 @@ private[sbt] object Retry {
       f: => T,
       limit: Int,
       excludedExceptions: Class[? <: Throwable]*,
-  ): T = apply(f, limit, defaultSleepInMillis, excludedExceptions: _*)
+  ): T = apply(f, limit, defaultSleepInMillis, excludedExceptions*)
 
   /**
    * Retry on all non-fatal exceptions that are NOT listed in
@@ -64,7 +64,7 @@ private[sbt] object Retry {
    * Non-IOException will immediately throw.
    */
   private[sbt] def io[@specialized A1](f: => A1, excludedExceptions: Class[? <: IOException]*): A1 =
-    io(f, limit, excludedExceptions: _*)
+    io(f, limit, excludedExceptions*)
 
   /**
    * Retry on all IOExceptions that are NOT listed in
@@ -75,7 +75,7 @@ private[sbt] object Retry {
       f: => A1,
       limit: Int,
       excludedExceptions: Class[? <: IOException]*,
-  ): A1 = io(f, limit, defaultSleepInMillis, excludedExceptions: _*)
+  ): A1 = io(f, limit, defaultSleepInMillis, excludedExceptions*)
 
   /**
    * Retry on all IOExceptions that are NOT listed in

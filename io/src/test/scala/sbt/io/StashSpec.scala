@@ -21,8 +21,8 @@ class StashSpec extends AnyFlatSpec with Matchers {
     succeed
   }
 
-  it should "move files during execution" in WithFiles(TestFiles: _*)(checkMove)
-  it should "restore files on exceptions but not errors" in WithFiles(TestFiles: _*)(checkRestore)
+  it should "move files during execution" in WithFiles(TestFiles*)(checkMove)
+  it should "restore files on exceptions but not errors" in WithFiles(TestFiles*)(checkRestore)
 
   def checkRestore(seq: Seq[File]): Unit = {
     allCorrect(seq)

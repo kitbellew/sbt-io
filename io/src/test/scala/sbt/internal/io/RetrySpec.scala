@@ -20,7 +20,7 @@ object RetrySpec extends verify.BasicTestSuite {
     val i = new AtomicInteger()
     def throww(): Any = throw new IOException(i.incrementAndGet().toString)
     try {
-      Retry(throww(), limit = 10, sleepInMillis = 10, noExcluded: _*)
+      Retry(throww(), limit = 10, sleepInMillis = 10, noExcluded*)
       assert(false)
     } catch {
       case ioe: IOException =>
@@ -33,7 +33,7 @@ object RetrySpec extends verify.BasicTestSuite {
     val i = new AtomicInteger()
     def throww(): Any = throw new IOException(i.incrementAndGet().toString)
     try {
-      Retry.io(throww(), limit = 10, sleepInMillis = 10, noExcluded: _*)
+      Retry.io(throww(), limit = 10, sleepInMillis = 10, noExcluded*)
       assert(false)
     } catch {
       case ioe: IOException =>
@@ -52,7 +52,7 @@ object RetrySpec extends verify.BasicTestSuite {
         },
         limit = 15,
         sleepInMillis = 0,
-        noExcluded: _*
+        noExcluded*
       )
       assert(value == "recover")
     }
