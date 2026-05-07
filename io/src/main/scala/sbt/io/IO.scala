@@ -455,9 +455,44 @@ object IO {
 
   /** Copies all bytes from the given input stream to the given File.  The input stream is not closed by this method. */
   def transfer(in: InputStream, to: File): Unit =
-    Using.fileOutputStream()(to) { outputStream =>
-      transfer(in, outputStream)
+    writeFileAtomically(to) { staging =>
+      Using.fileOutputStream()(staging) { outputStream =>
+        transfer(in, outputStream)
+      }
     }
+
+  /**
+   * Stages a write to a sibling temp file and atomically replaces `to` only after
+   * `write` returns successfully. If `write` throws, `to` is left untouched and the
+   * staging file is removed.
+   */
+  def writeFileAtomically[T](to: File)(write: File => T): T = {
+    val parent = Option(to.getAbsoluteFile.getParentFile).getOrElse(new File("."))
+    createDirectory(parent)
+    val name = to.getName
+    val prefix = if (name.length >= 3) name + "." else "sbt-" + name + "."
+    val staging = Files.createTempFile(parent.toPath, prefix, ".tmp")
+    try {
+      val result = write(staging.toFile)
+      try
+        Retry(
+          Files.move(
+            staging,
+            to.toPath,
+            StandardCopyOption.REPLACE_EXISTING,
+            StandardCopyOption.ATOMIC_MOVE
+          )
+        )
+      catch {
+        case _: AtomicMoveNotSupportedException =>
+          Retry(Files.move(staging, to.toPath, StandardCopyOption.REPLACE_EXISTING))
+      }
+      result
+    } finally {
+      Files.deleteIfExists(staging)
+      ()
+    }
+  }
 
   /**
    * Copies all bytes from the given input stream to the given output stream.
@@ -670,10 +705,12 @@ object IO {
         case parentFile => parentFile
       }
       createDirectory(outputDir)
-      withZipOutput(outputFile, manifest, localTime) { output =>
-        val createEntry: (String => ZipEntry) =
-          if (manifest.isDefined) new JarEntry(_) else new ZipEntry(_)
-        writeZip(sources, output, localTime)(createEntry)
+      writeFileAtomically(outputFile) { staging =>
+        withZipOutput(staging, manifest, localTime) { output =>
+          val createEntry: (String => ZipEntry) =
+            if (manifest.isDefined) new JarEntry(_) else new ZipEntry(_)
+          writeZip(sources, output, localTime)(createEntry)
+        }
       }
     }
   }
@@ -906,30 +943,32 @@ object IO {
       !sourceFile.isDirectory,
       "Source file '" + sourceFile.getAbsolutePath + "' is a directory."
     )
-    fileInputChannel(sourceFile) { in =>
-      fileOutputChannel(targetFile) { out =>
-        // maximum bytes per transfer according to  from http://dzone.com/snippets/java-filecopy-using-nio
-        val max = (64L * 1024 * 1024) - (32 * 1024)
-        val total = in.size
-        def loop(offset: Long): Long =
-          if (offset < total)
-            loop(offset + out.transferFrom(in, offset, max))
-          else
-            offset
-        val copied = loop(0)
-        if (copied != in.size)
-          sys.error(
-            "Could not copy '" + sourceFile + "' to '" + targetFile + "' (" + copied + "/" + in.size + " bytes copied)"
-          )
+    writeFileAtomically(targetFile) { staging =>
+      fileInputChannel(sourceFile) { in =>
+        fileOutputChannel(staging) { out =>
+          // maximum bytes per transfer according to  from http://dzone.com/snippets/java-filecopy-using-nio
+          val max = (64L * 1024 * 1024) - (32 * 1024)
+          val total = in.size
+          def loop(offset: Long): Long =
+            if (offset < total)
+              loop(offset + out.transferFrom(in, offset, max))
+            else
+              offset
+          val copied = loop(0)
+          if (copied != in.size)
+            sys.error(
+              "Could not copy '" + sourceFile + "' to '" + targetFile + "' (" + copied + "/" + in.size + " bytes copied)"
+            )
+        }
       }
-    }
-    if (preserveLastModified) {
-      copyLastModified(sourceFile, targetFile)
-      ()
-    }
-    if (preserveExecutable) {
-      copyExecutable(sourceFile, targetFile)
-      ()
+      if (preserveLastModified) {
+        copyLastModified(sourceFile, staging)
+        ()
+      }
+      if (preserveExecutable) {
+        copyExecutable(sourceFile, staging)
+        ()
+      }
     }
   }
 
