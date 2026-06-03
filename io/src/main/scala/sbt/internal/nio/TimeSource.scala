@@ -19,10 +19,10 @@ import scala.concurrent.duration._
  * that the the test author can manually increment to verify certain behaviors. Without this
  * indirection, it is difficult to make the tests deterministic.
  */
-private[nio] trait TimeSource {
+private[internal] trait TimeSource {
   def now: Deadline
 }
-private[nio] object TimeSource {
+private[internal] object TimeSource {
   implicit object default extends TimeSource {
     override def now: Deadline = new DefaultImpl()
   }
