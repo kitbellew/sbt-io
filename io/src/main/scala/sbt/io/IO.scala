@@ -16,7 +16,7 @@ import java.net.{ URI, URISyntaxException, URL }
 import java.nio.charset.Charset
 import java.nio.file.attribute.PosixFilePermissions
 import java.nio.file.{ Path => NioPath, _ }
-import java.util.{ Locale, Properties }
+import java.util.{ Locale, Properties, UUID }
 import java.util.jar.{ Attributes, JarEntry, JarFile, JarOutputStream, Manifest }
 import java.util.zip.{ CRC32, ZipEntry, ZipInputStream, ZipOutputStream }
 
@@ -470,22 +470,24 @@ object IO {
     val parent = Option(to.getAbsoluteFile.getParentFile).getOrElse(new File("."))
     createDirectory(parent)
     val name = to.getName
-    val prefix = if (name.length >= 3) name + "." else "sbt-" + name + "."
-    val staging = Files.createTempFile(parent.toPath, prefix, ".tmp")
+    val prefix = if (name.length >= 3) s"${name}." else s"sbt-${name}."
+    val u = UUID.randomUUID().toString().take(8)
+    val staging = new File(parent, s"${prefix}${u}.tmp").toPath()
+    touch(staging.toFile())
     try {
-      val result = write(staging.toFile)
+      val result = write(staging.toFile())
       try
         Retry(
           Files.move(
             staging,
-            to.toPath,
+            to.toPath(),
             StandardCopyOption.REPLACE_EXISTING,
             StandardCopyOption.ATOMIC_MOVE
           )
         )
       catch {
         case _: AtomicMoveNotSupportedException =>
-          Retry(Files.move(staging, to.toPath, StandardCopyOption.REPLACE_EXISTING))
+          Retry(Files.move(staging, to.toPath(), StandardCopyOption.REPLACE_EXISTING))
       }
       result
     } finally {

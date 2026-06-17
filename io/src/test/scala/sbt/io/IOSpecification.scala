@@ -58,10 +58,15 @@ object IOSpecification extends Properties("IO") {
     val target = new java.io.File(dir, "target.txt")
     try {
       IO.write(source, "complete")
-      IO.write(target, "previous")
+      val p1 =
+        if (IO.isWindows) None
+        else Some(Files.getPosixFilePermissions(source.toPath()))
       IO.copyFile(source, target)
+      val p2 =
+        if (IO.isWindows) None
+        else Some(Files.getPosixFilePermissions(target.toPath()))
       val content = IO.read(target)
-      content ?= "complete"
+      (content ?= "complete") && (p1 == p2)
     } finally IO.delete(dir)
   }
 
