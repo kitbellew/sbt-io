@@ -38,6 +38,10 @@ jobs:
             java: 8
             distribution: zulu
             jobtype: 3
+          - os: windows-11-arm
+            java: 21
+            distribution: temurin
+            jobtype: 3
     runs-on: ${{ matrix.os }}
     env:
       JAVA_OPTS: -Dsbt.io.virtual=false -Dfile.encoding=UTF-8
